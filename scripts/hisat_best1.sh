@@ -1,6 +1,6 @@
 #!/bin/sh
 #SBATCH --account=${ACCOUNT}
-#SBATCH --job-name=bowtie
+#SBATCH --job-name=hisat
 #SBATCH --time=08:00:00   # Bowtie takes over 4 hr to find best 2
 #SBATCH --mem-per-cpu=4G  # 16 GB total
 #SBATCH --cpus-per-task=4  # 4 cpu is optimal for 4 threads
@@ -13,13 +13,14 @@ set -o errexit # exit on errors
 #savefile *.SN
 
 echo 'Launch this in the sub-directory with the index and fastq files.'
-# sbatch --account=${ACCOUNT} ../bowtie_best1.sh
+# sbatch --account=${ACCOUNT} ../hisat_best1.sh
 
 echo MODULES
 module --force purge
 module load StdEnv 
 module load GCC/11.3.0
 module load Bowtie2/2.4.5-GCC-11.3.0
+module load HISAT2/2.2.1-gompi-2022a
 module load SAMtools/1.16.1-GCC-11.3.0
 module list
 
@@ -35,8 +36,8 @@ echo
 THREADS=4
 echo THREADS ${THREADS}
 
-# expect bowtie index file like lyrata.1.bt2 
-IDX=*1.bt2
+# expect hisat index file like lyrata.1.ht2 
+IDX=*1.ht2
 TARGET=` echo $IDX | sed 's/\..*//g' `
 echo "TARGET ${TARGET}"
 
@@ -50,10 +51,10 @@ ls -l
 echo
 
 date
-echo run Bowtie
-# assumes *.fasta and *.bt2 have same first name
+echo run HiSat
+# assumes *.fasta and *.ht2 have same first name
 # we want one alignment per read, so do not use k2
-bowtie2  \
+hisat2  \
     --no-unal \
     --no-mixed \
     --no-discordant \

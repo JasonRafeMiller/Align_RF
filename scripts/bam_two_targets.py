@@ -402,6 +402,13 @@ class tandem_file_walker():
         self.irp = irp
         self.diff = diff
 
+    def extract_read_number(self, read_id):
+        '''
+        Assume read ID like SRR21735970.999 with run name and read number separated by period.
+        The 'samtools sort -n' utility sorts numerically by the read number, so we must follow.
+        '''
+        return int(read_id.split('.')[1])
+        
     def go(self):
         '''
         Extract records from two BAM files, one for each parent.
@@ -414,16 +421,16 @@ class tandem_file_walker():
         try:
             while True:  # loop till EOF in either file
                 group1 = next(self.parser1)
-                rn1 = group1[0].rid
+                rn1 = self.extract_read_number(group1[0].rid)
                 group2 = next(self.parser2)
-                rn2 = group2[0].rid
+                rn2 = self.extract_read_number(group2[0].rid)
                 while rn1 != rn2: # advance cursors in tandem
                     if rn1 < rn2:
                         group1 = next(self.parser1)
-                        rn1 = group1[0].rid
+                        rn1 = self.extract_read_number(group1[0].rid)
                     if rn2 < rn1:
                         group2 = next(self.parser2)
-                        rn2 = group2[0].rid
+                        rn2 = self.extract_read_number(group2[0].rid)
                 pair = four_alignments(group1,group2)
                 if self.diff:
                     pair.allow_different_targets()
